@@ -378,4 +378,98 @@ if __name__ == "__main__":
     department_db = {}
     library_db = {}
 
+    # 1. College Info Setup
+    CollegeEntity.college_info("Institute of Engineering and Technology, Lucknow", "Sitapur Road, Lucknow")
+    CollegeEntity.get_college_info()
 
+    # 2. Creating Students
+    s1 = Student("S101", "Amit Sharma", 2, "B.Tech", "Computer Science")
+    s2 = Student("S102", "Riya Verma", 3, "B.Tech", "Electronics")
+    s3 = Student("S103", "Manish Kumar", 1, "B.Tech", "Mechanical")
+
+    # 3. Adding Students to Database
+    student_db[s1.student_id] = s1
+    student_db[s2.student_id] = s2
+    student_db[s3.student_id] = s3
+
+    # 4. Display Student Profiles
+    s1.display_profile()
+    s2.display_profile()
+    s3.display_profile()
+
+    # 5. Creating Faculty
+    f1 = Faculty("F201", "Dr. Anil Singh", "Computer Science")
+    f2 = Faculty("F202", "Prof. Neha Agarwal", "Electronics")
+
+    # 6. Adding Faculty to Database
+    faculty_db[f1.faculty_id] = f1
+    faculty_db[f2.faculty_id] = f2
+
+    # 7. Display Faculty
+    f1.display_profile()
+    f2.display_profile()
+
+    # 8. Creating Department
+    cse_dept = Department("D01", "Computer Science", ["B.Tech", "M.Tech"], [s1], student_db, [f1], faculty_db)
+    cse_dept.organise_fest("TechX", "20 Aug 2025", "Auditorium", 50000, ["Amit Sharma", "Team TechX"])
+
+    # 9. Creating and Managing Club
+    dance_club = Club("Dance Club", s1, s2, {})
+    dance_club.add_member("S101")
+    dance_club.add_member("S102")
+    dance_club.add_instrument("DJ Console")
+    dance_club.remove_member("S102")
+    dance_club.change_secretary(s3)
+    dance_club.display_club_info()
+
+    # 10. Hostel Management
+    rooms = {
+        "101": [],
+        "102": []
+    }
+    hostel = Hostel("Aryabhatt Hostel", rooms)
+    hostel.add_room_members("101", s1, s3)
+    hostel.get_roommates("101")
+    hostel.pay_fees("101", 15000, student_db)
+    hostel.penalty("101", 500, student_db)
+    hostel.vaccate_room("101")
+    hostel.get_roommates("101")
+
+    # 11. Library Management
+    library = Library("Central Library", {"Python Programming": 3, "Digital Logic": 2})
+    library.issue_book("Python Programming", s1)
+    library.issue_book("Digital Logic", s3)
+    library.issue_book("Quantum Physics", s2)  # Not available
+
+    # 12. Accounts Department
+    accounts = AccountsDepartment("Accounts")
+    accounts.pay_fees(s1, 10000)
+    accounts.pay_fees(s2, 12000)
+
+    # 13. Academic Records
+    academic = Academic("Academic Block")
+    academic.assign_grade(f1, s1, 2, 1, "Data Structures", "A")
+    academic.assign_grade(f1, s1, 2, 1, "OOP", "B+")
+    academic.assign_grade(f2, s1, 2, 1, "Signals", "A")  # Department mismatch
+    academic.view_grades(s1)
+    academic.view_subject_grades("Data Structures")
+
+    # 14. Canteen Management
+    canteen = Canteen("IET Cafeteria", {"Chowmein": 40, "Coffee": 20})
+    canteen.order_item(s2, "Coffee")
+    canteen.order_item(s3, "Pizza")  # Not available
+    canteen.request_item("Pizza", 80)
+    canteen.order_item(s3, "Pizza")
+    canteen.update_menu(canteen_db, "Sandwich", 30)
+    canteen.update_db(canteen_db)
+
+    # 15. NNF Functionality
+    nnf = NNF()
+    nnf.chief_director = "Mr. Rajeev Tiwari"
+    nnf.add_startup("GreenTech Solutions")
+    nnf.add_startup("EduSpark")
+    nnf.add_past_event("Hackathon 2023")
+    nnf.schedule_event("Startup Meet 2025")
+    nnf.remove_past_event("Hackathon 2023")
+    nnf.remove_upcoming_event("Startup Meet 2025")
+    nnf.show_all_events()
