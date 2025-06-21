@@ -3,7 +3,7 @@ import time
 def get_element_by_id(id, db):
     return db.get(id)
 
-def display_db(db) :
+def display_db(db):
     for key, value in db.items():
         print(f"{key} : {value}")
 
@@ -26,19 +26,28 @@ class CollegeEntity:
     def get_college_info(cls):
         print(f"College Name: {cls.clg_name}, College Address: {cls.clg_address}")
 
+class Course:
+    def __init__(self, course_id, course_name):
+        self.course_id = course_id
+        self.course_name = course_name
+
+    def __repr__(self):
+        return f"{self.course_name}"
+
 class Student:
-    def __init__(self, student_id, name, year, course, branch, phone, email, fees=0):
-        self.student_id = student_id
+    def __init__(self, student_id, roll_no, name, year, course, branch, phone, email, fees=0):
+        self.student_id = student_id 
+        self.roll_no = roll_no        
         self.name = name
         self.year = year
-        self.course = course
+        self.course = course         
         self.fees = fees
         self.branch = branch
         self.phone = phone
         self.email = email
 
     def display_profile(self):
-        print(f"ID: {self.student_id}, Name: {self.name}, Year: {self.year}, Course: {self.course}, Branch: {self.branch}, Phone: {self.phone}, Email: {self.email}")
+        print(f"ID: {self.student_id}, Roll No: {self.roll_no}, Name: {self.name}, Year: {self.year}, Course: {self.course}, Branch: {self.branch}, Phone: {self.phone}, Email: {self.email}")
 
 class Faculty:
     def __init__(self, faculty_id, name, department, phone, email):
@@ -130,10 +139,10 @@ class Club(CollegeEntity):
         for member in self.members:
             student = self.members[member]
             if student is not None:
-                print(f" - {student.name} (ID: {student.student_id}, Dept: {student.branch})")
+                print(f" - {student.name} (ID: {student.student_id}, Dept: {student.branch}, Roll No: {student.roll_no})")
             else:
                 print(f" - [Invalid member data for ID: {member}]")
-                
+
 class Society(CollegeEntity):
     SOCIETY_CATEGORIES = {
         "Departmental": ["SAE", "IEEE"],
@@ -155,7 +164,6 @@ class Society(CollegeEntity):
                 return category
         return "Uncategorized"
 
-    # head
     @property
     def head(self):
         return self._head
@@ -165,7 +173,6 @@ class Society(CollegeEntity):
         self._head = new_head
         print(f"Society head updated to: {new_head}")
 
-    # coordinator
     @property
     def coordinator(self):
         return self._coordinator
@@ -175,7 +182,6 @@ class Society(CollegeEntity):
         self._coordinator = new_coordinator
         print(f"Coordinator updated to: {new_coordinator}")
 
-    # Members and Volunteers
     def add_member(self, name, student_id, department):
         self.members.append({"name": name, "id": student_id, "department": department})
         print(f"{name} added to society {self.name}")
@@ -188,7 +194,6 @@ class Society(CollegeEntity):
         self.volunteers.append({"name": name, "id": student_id, "department": department})
         print(f"Volunteer {name} from {department} added to {self.name}")
 
-    # Society Info View
     def show_society_info(self):
         print(f"\nSociety: {self.name} ({self.category})")
         print(f"Head: {self._head}")
@@ -203,16 +208,16 @@ class Society(CollegeEntity):
                 print(f"  - {v['name']} (ID: {v['id']}, Dept: {v['department']})")
 
 class Department(CollegeEntity):
-    def __init__(self,id, name, courses, std, std_db, faculty, faculty_db):
+    def __init__(self, id, name, courses, std, std_db, faculty, faculty_db):
         super().__init__(name)
         self.id = id
-        self.courses = courses
+        self.courses = courses  # list of Course objects
         self.students = std
         self.std_db = std_db
         self.faculty = faculty
         self.faculty_db = faculty_db
 
-    def organise_fest( self, fest_name, fest_date, fest_location, fest_budget, fest_members):
+    def organise_fest(self, fest_name, fest_date, fest_location, fest_budget, fest_members):
         self.fest_name = fest_name
         self.fest_date = fest_date
         self.fest_location = fest_location
@@ -228,7 +233,6 @@ class NNF(CollegeEntity):
         self._past_events = []
         self._upcoming_events = []
 
-    # Management
     @property
     def chief_director(self):
         return self._chief_director
@@ -239,7 +243,6 @@ class NNF(CollegeEntity):
         self._chief_director = name
         print(f"Chief Director {action}: {name}")
 
-    # Incubation Hub
     @property
     def startups(self):
         return self._startups
@@ -253,7 +256,6 @@ class NNF(CollegeEntity):
         for s in self._startups:
             print(f" - {s}")
 
-    # Events
     @property
     def past_events(self):
         return self._past_events
@@ -291,7 +293,7 @@ class NNF(CollegeEntity):
 class Hostel(CollegeEntity):
     def __init__(self, name, rooms):
         super().__init__(name)
-        self.rooms = rooms  # dict: {room_no: student}
+        self.rooms = rooms  
 
     def vaccate_room(self, room_no):
         if room_no in self.rooms:
@@ -433,7 +435,7 @@ class Academic(CollegeEntity):
     def view_grades(self, student):
         student_id = student.student_id
 
-        print(f"\nGrades for {student.name} (ID: {student_id}):")
+        print(f"\nGrades for {student.name} (ID: {student_id}, Roll No: {student.roll_no}):")
 
         if student_id not in self.records:
             print("No records found.")
@@ -502,38 +504,62 @@ if __name__ == "__main__":
     CollegeEntity.college_info("Institute of Engineering and Technology, Lucknow", "Sitapur Road, Lucknow")
     CollegeEntity.get_college_info()
 
-    # 2. Creating Students
-    s1 = Student("S101", "Amit Sharma", 2, "B.Tech", "Computer Science", "9000000001", "amit@college.edu")
-    s2 = Student("S102", "Riya Verma", 3, "B.Tech", "Electronics", "9000000002", "riya@college.edu")
-    s3 = Student("S103", "Manish Kumar", 1, "B.Tech", "Mechanical", "9000000003", "manish@college.edu")
+    # 2. Define Courses
+    btech = Course("C01", "B.Tech")
+    mtech = Course("C02", "M.Tech")
+    phd = Course("C03", "PhD")
 
-    # 3. Adding Students to Database
+    # 3. Define Departments (with their courses)
+    dept_courses = [btech, mtech, phd]
+    departments = {
+        "Computer Science and Engineering": Department("D01", "Computer Science and Engineering", dept_courses, [], student_db, [], faculty_db),
+        "Electrical Engineering Department": Department("D02", "Electrical Engineering Department", dept_courses, [], student_db, [], faculty_db),
+        "Electronics": Department("D03", "Electronics", dept_courses, [], student_db, [], faculty_db),
+        "Mechanical": Department("D04", "Mechanical", dept_courses, [], student_db, [], faculty_db),
+        "Civil": Department("D05", "Civil", dept_courses, [], student_db, [], faculty_db),
+        "Chemical": Department("D06", "Chemical", dept_courses, [], student_db, [], faculty_db),
+    }
+
+    # 4. Creating Students
+    s1 = Student("S101", "2021CS101", "Amit Sharma", 2, btech, "Computer Science and Engineering", "9000000001", "amit@college.edu")
+    s2 = Student("S102", "2020EC102", "Riya Verma", 3, btech, "Electronics", "9000000002", "riya@college.edu")
+    s3 = Student("S103", "2022ME103", "Manish Kumar", 1, btech, "Mechanical", "9000000003", "manish@college.edu")
+
+    # 5. Adding Students to Database
     student_db[s1.student_id] = s1
     student_db[s2.student_id] = s2
     student_db[s3.student_id] = s3
 
-    # 4. Display Student Profiles
+    # 6. Add students to departments (by branch)
+    departments["Computer Science and Engineering"].students.append(s1)
+    departments["Electronics"].students.append(s2)
+    departments["Mechanical"].students.append(s3)
+
+    # 7. Display Student Profiles
     s1.display_profile()
     s2.display_profile()
     s3.display_profile()
 
-    # 5. Creating Faculty
-    f1 = Faculty("F201", "Dr. Anil Singh", "Computer Science", "8000000001", "anil@college.edu")
+    # 8. Creating Faculty
+    f1 = Faculty("F201", "Dr. Anil Singh", "Computer Science and Engineering", "8000000001", "anil@college.edu")
     f2 = Faculty("F202", "Prof. Neha Agarwal", "Electronics", "8000000002", "neha@college.edu")
 
-    # 6. Adding Faculty to Database
+    # 9. Adding Faculty to Database
     faculty_db[f1.faculty_id] = f1
     faculty_db[f2.faculty_id] = f2
 
-    # 7. Display Faculty
+    departments["Computer Science and Engineering"].faculty.append(f1)
+    departments["Electronics"].faculty.append(f2)
+
+    # 10. Display Faculty
     f1.display_profile()
     f2.display_profile()
 
-    # 8. Creating Department
-    cse_dept = Department("D01", "Computer Science", ["B.Tech", "M.Tech"], [s1], student_db, [f1], faculty_db)
+    # 11. Creating Department Example Usage
+    cse_dept = departments["Computer Science and Engineering"]
     cse_dept.organise_fest("TechX", "20 Aug 2025", "Auditorium", 50000, ["Amit Sharma", "Team TechX"])
 
-    # 9. Creating and Managing Club
+    # 12. Creating and Managing Club
     dance_club = Club("Dance Club", s1, s2, {})
     dance_club.add_member("S101")
     dance_club.add_member("S102")
@@ -542,13 +568,13 @@ if __name__ == "__main__":
     dance_club.change_secretary(s3)
     dance_club.display_club_info()
 
-    # 9a. Creating and Managing Society
+    # 13. Creating and Managing Society
     society = Society("SAE", "Dr. Rakesh Kumar", "Neha Agarwal")
-    society.add_member("Amit Sharma", "S101", "Computer Science")
+    society.add_member("Amit Sharma", "S101", "Computer Science and Engineering")
     society.add_volunteer("Riya Verma", "S102", "Electronics")
     society.show_society_info()
 
-    # 10. Hostel Management
+    # 14. Hostel Management
     rooms = {
         "101": [],
         "102": []
@@ -561,7 +587,7 @@ if __name__ == "__main__":
     hostel.vaccate_room("101")
     hostel.get_roommates("101")
 
-    # 11. Library Management
+    # 15. Library Management
     library = Library("Central Library", {
         "Python Programming": {"rentable": 2, "non_rentable": 1},
         "Digital Logic": {"rentable": 1, "non_rentable": 2}
@@ -581,12 +607,12 @@ if __name__ == "__main__":
     library.issue_book("Python Programming", s1)
     library.return_book("Python Programming", s1)
 
-    # 12. Accounts Department
+    # 16. Accounts Department
     accounts = AccountsDepartment("Accounts")
     accounts.pay_fees(s1, 10000)
     accounts.pay_fees(s2, 12000)
 
-    # 13. Academic Records
+    # 17. Academic Records
     academic = Academic("Academic Block")
     academic.assign_grade(f1, s1, 2, 1, "Data Structures", "A")
     academic.assign_grade(f1, s1, 2, 1, "OOP", "B+")
@@ -594,7 +620,7 @@ if __name__ == "__main__":
     academic.view_grades(s1)
     academic.view_subject_grades("Data Structures")
 
-    # 14. Canteen Management
+    # 18. Canteen Management
     canteen = Canteen("IET Cafeteria", {"Chowmein": 40, "Coffee": 20})
     canteen.order_item(s2, "Coffee")
     canteen.order_item(s3, "Pizza")  # Not available
@@ -604,7 +630,7 @@ if __name__ == "__main__":
     canteen.update_menu(canteen_db, "Sandwich", 30)
     canteen.update_db(canteen_db)
 
-    # 15. NNF Functionality
+    # 19. NNF Functionality
     nnf = NNF()
     nnf.chief_director = "Mr. Rajeev Tiwari"
     nnf.add_startup("GreenTech Solutions")
