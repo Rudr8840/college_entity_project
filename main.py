@@ -289,7 +289,7 @@ class Library(CollegeEntity):
         else:
             print(f"Book {book_title} is not available in {self.name}")
 
-    def remove_rentable_book(self, book_title, count):
+    def remove_non_rentable_book(self, book_title, count):
         if book_title in self.books:
             if self.books[book_title]["non_rentable"] >= 0:
                 self.books[book_title]["non_rentable"] -= count
