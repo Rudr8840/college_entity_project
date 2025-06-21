@@ -133,8 +133,7 @@ class Club(CollegeEntity):
                 print(f" - {student.name} (ID: {student.student_id}, Dept: {student.branch})")
             else:
                 print(f" - [Invalid member data for ID: {member}]")
-
-# Society class inserted here
+                
 class Society(CollegeEntity):
     SOCIETY_CATEGORIES = {
         "Departmental": ["SAE", "IEEE"],
