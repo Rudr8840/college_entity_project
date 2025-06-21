@@ -144,7 +144,7 @@ class Department(CollegeEntity):
         super().__init__(name)
         self.id = id
         self.courses = courses
-        self.studnets = std
+        self.students = std
         self.std_db = std_db
         self.faculty = faculty
         self.faculty_db = faculty_db
