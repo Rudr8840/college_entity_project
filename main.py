@@ -6,6 +6,10 @@ def get_element_by_id(id, db):
         return obj
     else:
         return None
+    
+def display_db(db) :
+    for key, value in db.items():
+        print(f"{key} : {value}")
 
 class CollegeEntity:
     clg_name = None
@@ -26,7 +30,6 @@ class CollegeEntity:
     def get_college_info(cls):
         print(f"College Name: {cls.clg_name}, College Address: {cls.clg_address}")
 
-
 class Student:
 
     def __init__(self, student_id, name, year, course, branch, fees=0):
@@ -45,7 +48,6 @@ class Student:
         db[student.student_id] = student.__dict__
         print(f"Student {student.name} added to database")
 
-
 class Faculty:
 
     def __init__(self, faculty_id, name, department):
@@ -60,7 +62,6 @@ class Faculty:
     def add_faculty_database(db, faculty):
         db[faculty.faculty_id] = faculty.__dict__
         print(f"Faculty {faculty.name} added to database")
-
 
 class Club(CollegeEntity):
 
@@ -82,12 +83,13 @@ class Club(CollegeEntity):
         }
     }
 
-    def _init_(self, name, treasurer, secretary, members):
-        super()._init_(name)
+    def __init__(self, name, treasurer, secretary, members):
+        super().__init__(name)
         self.category, self.instruments = self._get_category_and_instruments(name)
         self.treasurer = treasurer
         self.secretary = secretary
-        self.members = {}.update(members)
+        self.members = {}
+        self.members.update(members)
 
     def _get_category_and_instruments(self, name):
         for category, clubs in Club.CLUB_CATEGORIES.items():
@@ -96,7 +98,10 @@ class Club(CollegeEntity):
         raise ValueError(f"Club '{name}' not found in predefined categories")
 
     def add_member(self, student_id):
-        self.members[student_id] = get_element_by_id(student_id, student_db)
+        if student_id in self.members:
+            print(f"Student {student_id} is already a member of {self.name}")
+        else:
+            self.members[student_id] = get_element_by_id(student_id, student_db)
 
     def remove_member(self, student_id):
         if student_id in self.members:
@@ -131,8 +136,7 @@ class Club(CollegeEntity):
         print(f"Instruments/Resources: {', '.join(self.instruments)}")
         print(f"Members Count: {len(self.members)}")
         for member in self.members:
-            print(f"- {member.name} (ID: {member.id}, Dept: {member.branch})")
-
+            print(f" - {self.members[member].name} (ID: {self.members[member].student_id}, Dept: {self.members[member].branch})")
 
 class Department(CollegeEntity):
 
@@ -152,11 +156,10 @@ class Department(CollegeEntity):
         self.fest_budget = fest_budget
         self.fest_members = fest_members
         print(f"Organised {fest_name} on {fest_date} at {fest_location}")
-    
 
 class NNF(CollegeEntity):
-    def _init_(self, name="Navchar Navyug Foundation"):
-        super()._init_(name)
+    def __init__(self, name="Navchar Navyug Foundation"):
+        super().__init__(name)
         self._chief_director = None
         self._startups = []
         self._past_events = []
@@ -222,7 +225,6 @@ class NNF(CollegeEntity):
         for e in self._upcoming_events:
             print(" - " + e)
 
-
 class Hostel(CollegeEntity):
 
     def __init__(self, name, rooms):
@@ -230,12 +232,13 @@ class Hostel(CollegeEntity):
         self.rooms = rooms  # dict: {room_no: student}
 
     def vaccate_room(self, room_no):
-        self.rooms[room_no] = []
+        if room_no in self.rooms:
+            del self.rooms[room_no]
 
     def add_room_members(self, room_no, *students):
-        self.vaccate_room()
-        self.rooms[room_no].extend(students)
-        print(f"Room {room_no} in {self.name} allocated to {students}")
+        self.vaccate_room(room_no)
+        self.rooms[room_no] = students
+        print(f"Room {room_no} in {self.name} allocated to {[student.name for student in students]}")
 
     def pay_fees(self, room_no, amount, db):
         if room_no in self.rooms:
@@ -249,7 +252,7 @@ class Hostel(CollegeEntity):
 
     def get_roommates(self, room_no):
         ls = self.rooms[room_no] if room_no in self.rooms else []
-        print(ls)
+        print([student.name for student in ls])
 
     def penalty(self, room_no, amount, db):
         if room_no in self.rooms:
@@ -259,18 +262,82 @@ class Hostel(CollegeEntity):
                 time.sleep(1)
                 print(f"Student {student.name} paid {amount} to {room_no} in {self.name} as penalty")
 
-
 class Library(CollegeEntity):
+
     def __init__(self, name, books=None):
         super().__init__(name)
-        self.books = books if books else {}  # dict: {book_title: count}
+        self.books = books if books else {}  # dict: {book_title: {rentable:count1, non_rentable:count2}}
+
+    def add_rentable_book(self, book_title, count):
+        if book_title in self.books:
+            self.books[book_title]["rentable"] += count
+        else:
+            self.books[book_title] = {"rentable": count, "non_rentable": 0}
+
+    def add_non_rentable_book(self, book_title, count):
+        if book_title in self.books:
+            self.books[book_title]["non_rentable"] += count
+        else:
+            self.books[book_title] = {"rentable": 0, "non_rentable": count}
+    
+    def remove_rentable_book(self, book_title, count):
+        if book_title in self.books:
+            if self.books[book_title]["rentable"] >= 0:
+                self.books[book_title]["rentable"] -= count
+            else:
+                print(f"Book {book_title} is not available in {self.name}")
+        else:
+            print(f"Book {book_title} is not available in {self.name}")
+
+    def remove_rentable_book(self, book_title, count):
+        if book_title in self.books:
+            if self.books[book_title]["non_rentable"] >= 0:
+                self.books[book_title]["non_rentable"] -= count
+            else:
+                print(f"Book {book_title} is not available in {self.name}")
+        else:
+            print(f"Book {book_title} is not available in {self.name}")
 
     def issue_book(self, title, student):
-        if self.books.get(title, 0) > 0:
-            self.books[title] -= 1
-            print(f"{title} issued to {student.name}")
+        if title in self.books:
+            if self.books[title]["rentable"] > 0:
+                self.books[title]["rentable"] -= 1
+                print(f"Book {title} issued to {student.name}")
         else:
-            print(f"{title} not available")
+            print(f"Book {title} is not available in {self.name}")
+
+    
+    def return_book(self, title, student):
+        if title in self.books:
+            self.books[title]["rentable"] += 1
+            print(f"{title} returned by {student.name}")
+        else:
+            print("Updating Shelf....")
+            time.sleep(1)
+            self.books.update({title:{"rentable":1, "non_rentable":0}})
+            print(f"{title} added to {self.name}. Shelf Updated")
+
+    def update_db(self, db) :
+        for book in self.books:
+            db[book] = self.books[book]
+            print(f"Database updated for {self.name}")
+
+    
+    @staticmethod
+    def get_rentable_books(db) :
+        rentable_db = {}
+        for key, value in db.items():
+            if value["rentable"] > 0 :
+                rentable_db[key] = value["rentable"]
+        return rentable_db
+
+    @staticmethod
+    def get_non_rentable_books(db) :
+        non_rentable_db = {}
+        for key, value in db.items():
+            if value["non_rentable"] > 0 :
+                non_rentable_db[key] = value["non_rentable"]
+        return non_rentable_db
 
 
 class AccountsDepartment(CollegeEntity):
@@ -283,7 +350,6 @@ class AccountsDepartment(CollegeEntity):
         student.fees += amount
         print(f"{student.name} paid ₹{amount}")
 
-
 class Academic(CollegeEntity):
 
     def __init__(self, name):
@@ -291,10 +357,6 @@ class Academic(CollegeEntity):
         self.records = {}  # dict: {student_id: grades}
 
     def assign_grade(self, faculty, student, year, semester, subject, grade):
-        if faculty.department != student.department:
-            print("Faculty can't assign grade. Department mismatch.")
-            return
-
         student_id = student.student_id
 
         if student_id not in self.records:
@@ -340,7 +402,6 @@ class Academic(CollegeEntity):
         self.records[student.student_id] = grades
         print(f"{student.name}'s grades updated")
 
-
 class Canteen(CollegeEntity):
 
     def __init__(self, name, menu):
@@ -358,15 +419,18 @@ class Canteen(CollegeEntity):
         print(f"Canteen {db[self.name]} updated in database")
 
     def update_menu(self, db, item, price):
+        if self.name not in db:
+            print(f"{self.name} not found in DB. Adding first...")
+            self.update_db(db)
         db[self.name].update({item: price})
         print(f"Menu updated in database")
+
 
     def request_item(self, item, price):
         print(f"Requested to add {item} add to canteen menu for ₹{price}...")
         time.sleep(2)
         self.menu[item] = price
         print("Request Approved")
-
 
 if __name__ == "__main__":
 
@@ -391,6 +455,7 @@ if __name__ == "__main__":
     student_db[s1.student_id] = s1
     student_db[s2.student_id] = s2
     student_db[s3.student_id] = s3
+
 
     # 4. Display Student Profiles
     s1.display_profile()
@@ -436,10 +501,24 @@ if __name__ == "__main__":
     hostel.get_roommates("101")
 
     # 11. Library Management
-    library = Library("Central Library", {"Python Programming": 3, "Digital Logic": 2})
+    library = Library("Central Library", {
+        "Python Programming": {"rentable": 2, "non_rentable": 1},
+        "Digital Logic": {"rentable": 1, "non_rentable": 2}
+    })
+
+    library.add_rentable_book('Quantum Physics', 3)
+    library.add_non_rentable_book('Artificial Intelligence', 2)
+    library.update_db(library_db)
+
+    rentable_books = Library.get_rentable_books(library.books)
+    non_rentable_books = Library.get_non_rentable_books(library.books)
+    print("\nAvailable Rentable Books:")
+    display_db(rentable_books)
+    print("\nAvailable Non-Rentable Books:")
+    display_db(non_rentable_books)
+
     library.issue_book("Python Programming", s1)
-    library.issue_book("Digital Logic", s3)
-    library.issue_book("Quantum Physics", s2)  # Not available
+    library.return_book("Python Programming", s1)
 
     # 12. Accounts Department
     accounts = AccountsDepartment("Accounts")
@@ -460,6 +539,7 @@ if __name__ == "__main__":
     canteen.order_item(s3, "Pizza")  # Not available
     canteen.request_item("Pizza", 80)
     canteen.order_item(s3, "Pizza")
+    canteen.update_db(canteen_db)
     canteen.update_menu(canteen_db, "Sandwich", 30)
     canteen.update_db(canteen_db)
 
@@ -473,3 +553,4 @@ if __name__ == "__main__":
     nnf.remove_past_event("Hackathon 2023")
     nnf.remove_upcoming_event("Startup Meet 2025")
     nnf.show_all_events()
+
