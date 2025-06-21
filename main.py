@@ -1,12 +1,8 @@
 import time
 
 def get_element_by_id(id, db):
-    obj = db.get(id)
-    if obj:
-        return obj
-    else:
-        return None
-    
+    return db.get(id)
+
 def display_db(db) :
     for key, value in db.items():
         print(f"{key} : {value}")
@@ -31,7 +27,6 @@ class CollegeEntity:
         print(f"College Name: {cls.clg_name}, College Address: {cls.clg_address}")
 
 class Student:
-
     def __init__(self, student_id, name, year, course, branch, fees=0):
         self.student_id = student_id
         self.name = name
@@ -43,13 +38,7 @@ class Student:
     def display_profile(self):
         print(f"ID: {self.student_id}, Name: {self.name}, Year: {self.year}, Course: {self.course}, Branch: {self.branch}")
 
-    @staticmethod
-    def add_student_database(db, student):
-        db[student.student_id] = student.__dict__
-        print(f"Student {student.name} added to database")
-
 class Faculty:
-
     def __init__(self, faculty_id, name, department):
         self.faculty_id = faculty_id
         self.name = name
@@ -58,13 +47,7 @@ class Faculty:
     def display_profile(self):
         print(f"ID: {self.faculty_id}, Name: {self.name}, Department: {self.department}")
 
-    @staticmethod
-    def add_faculty_database(db, faculty):
-        db[faculty.faculty_id] = faculty.__dict__
-        print(f"Faculty {faculty.name} added to database")
-
 class Club(CollegeEntity):
-
     CLUB_CATEGORIES = {
         "Cultural": {
             "Dance Club": ["Speakers"],
@@ -94,14 +77,19 @@ class Club(CollegeEntity):
     def _get_category_and_instruments(self, name):
         for category, clubs in Club.CLUB_CATEGORIES.items():
             if name in clubs:
-                return category, clubs[name]
+                return category, clubs[name][:]
         raise ValueError(f"Club '{name}' not found in predefined categories")
 
     def add_member(self, student_id):
         if student_id in self.members:
             print(f"Student {student_id} is already a member of {self.name}")
+            return
+        student = get_element_by_id(student_id, student_db)
+        if student is not None:
+            self.members[student_id] = student
+            print(f"Student {student_id} added to {self.name}")
         else:
-            self.members[student_id] = get_element_by_id(student_id, student_db)
+            print(f"Student {student_id} not found in database")
 
     def remove_member(self, student_id):
         if student_id in self.members:
@@ -136,10 +124,13 @@ class Club(CollegeEntity):
         print(f"Instruments/Resources: {', '.join(self.instruments)}")
         print(f"Members Count: {len(self.members)}")
         for member in self.members:
-            print(f" - {self.members[member].name} (ID: {self.members[member].student_id}, Dept: {self.members[member].branch})")
+            student = self.members[member]
+            if student is not None:
+                print(f" - {student.name} (ID: {student.student_id}, Dept: {student.branch})")
+            else:
+                print(f" - [Invalid member data for ID: {member}]")
 
 class Department(CollegeEntity):
-
     def __init__(self,id, name, courses, std, std_db, faculty, faculty_db):
         super().__init__(name)
         self.id = id
@@ -226,7 +217,6 @@ class NNF(CollegeEntity):
             print(" - " + e)
 
 class Hostel(CollegeEntity):
-
     def __init__(self, name, rooms):
         super().__init__(name)
         self.rooms = rooms  # dict: {room_no: student}
@@ -263,10 +253,9 @@ class Hostel(CollegeEntity):
                 print(f"Student {student.name} paid {amount} to {room_no} in {self.name} as penalty")
 
 class Library(CollegeEntity):
-
     def __init__(self, name, books=None):
         super().__init__(name)
-        self.books = books if books else {}  # dict: {book_title: {rentable:count1, non_rentable:count2}}
+        self.books = books if books else {}
 
     def add_rentable_book(self, book_title, count):
         if book_title in self.books:
@@ -279,22 +268,22 @@ class Library(CollegeEntity):
             self.books[book_title]["non_rentable"] += count
         else:
             self.books[book_title] = {"rentable": 0, "non_rentable": count}
-    
+
     def remove_rentable_book(self, book_title, count):
         if book_title in self.books:
-            if self.books[book_title]["rentable"] >= 0:
+            if self.books[book_title]["rentable"] >= count:
                 self.books[book_title]["rentable"] -= count
             else:
-                print(f"Book {book_title} is not available in {self.name}")
+                print(f"Not enough rentable copies of {book_title} in {self.name}")
         else:
             print(f"Book {book_title} is not available in {self.name}")
 
     def remove_non_rentable_book(self, book_title, count):
         if book_title in self.books:
-            if self.books[book_title]["non_rentable"] >= 0:
+            if self.books[book_title]["non_rentable"] >= count:
                 self.books[book_title]["non_rentable"] -= count
             else:
-                print(f"Book {book_title} is not available in {self.name}")
+                print(f"Not enough non-rentable copies of {book_title} in {self.name}")
         else:
             print(f"Book {book_title} is not available in {self.name}")
 
@@ -303,10 +292,11 @@ class Library(CollegeEntity):
             if self.books[title]["rentable"] > 0:
                 self.books[title]["rentable"] -= 1
                 print(f"Book {title} issued to {student.name}")
+            else:
+                print(f"No rentable copies of {title} available in {self.name}")
         else:
             print(f"Book {title} is not available in {self.name}")
 
-    
     def return_book(self, title, student):
         if title in self.books:
             self.books[title]["rentable"] += 1
@@ -320,9 +310,8 @@ class Library(CollegeEntity):
     def update_db(self, db) :
         for book in self.books:
             db[book] = self.books[book]
-            print(f"Database updated for {self.name}")
+        print(f"Database updated for {self.name}")
 
-    
     @staticmethod
     def get_rentable_books(db) :
         rentable_db = {}
@@ -339,7 +328,6 @@ class Library(CollegeEntity):
                 non_rentable_db[key] = value["non_rentable"]
         return non_rentable_db
 
-
 class AccountsDepartment(CollegeEntity):
     def __init__(self, name):
         super().__init__(name)
@@ -351,10 +339,9 @@ class AccountsDepartment(CollegeEntity):
         print(f"{student.name} paid ₹{amount}")
 
 class Academic(CollegeEntity):
-
     def __init__(self, name):
         super().__init__(name)
-        self.records = {}  # dict: {student_id: grades}
+        self.records = {}
 
     def assign_grade(self, faculty, student, year, semester, subject, grade):
         student_id = student.student_id
@@ -396,17 +383,16 @@ class Academic(CollegeEntity):
                     sem_data = self.records[student_id][year][semester]
                     if subject_name in sem_data:
                         grade = sem_data[subject_name]
-                        print(f"Student ID {student_id} - Year {year} Sem {semester}: {grade}")    
+                        print(f"Student ID {student_id} - Year {year} Sem {semester}: {grade}")
 
     def update_grades(self, student, grades):
         self.records[student.student_id] = grades
         print(f"{student.name}'s grades updated")
 
 class Canteen(CollegeEntity):
-
     def __init__(self, name, menu):
         super().__init__(name)
-        self.menu = menu  # dict: {item: price}
+        self.menu = menu
 
     def order_item(self, student, item):
         if item in self.menu:
@@ -425,7 +411,6 @@ class Canteen(CollegeEntity):
         db[self.name].update({item: price})
         print(f"Menu updated in database")
 
-
     def request_item(self, item, price):
         print(f"Requested to add {item} add to canteen menu for ₹{price}...")
         time.sleep(2)
@@ -433,7 +418,6 @@ class Canteen(CollegeEntity):
         print("Request Approved")
 
 if __name__ == "__main__":
-
     # Creating Databases
     faculty_db = {}
     student_db = {}
@@ -455,7 +439,6 @@ if __name__ == "__main__":
     student_db[s1.student_id] = s1
     student_db[s2.student_id] = s2
     student_db[s3.student_id] = s3
-
 
     # 4. Display Student Profiles
     s1.display_profile()
@@ -553,4 +536,3 @@ if __name__ == "__main__":
     nnf.remove_past_event("Hackathon 2023")
     nnf.remove_upcoming_event("Startup Meet 2025")
     nnf.show_all_events()
-
