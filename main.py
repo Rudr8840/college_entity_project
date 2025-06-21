@@ -544,7 +544,7 @@ if __name__ == "__main__":
     dance_club.display_club_info()
 
     # 9a. Creating and Managing Society
-    society = Society("SAE", "Dr. Rakesh Kumar", "Prof. Neha Agarwal")
+    society = Society("SAE", "Dr. Rakesh Kumar", "Neha Agarwal")
     society.add_member("Amit Sharma", "S101", "Computer Science")
     society.add_volunteer("Riya Verma", "S102", "Electronics")
     society.show_society_info()
