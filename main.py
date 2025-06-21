@@ -27,25 +27,29 @@ class CollegeEntity:
         print(f"College Name: {cls.clg_name}, College Address: {cls.clg_address}")
 
 class Student:
-    def __init__(self, student_id, name, year, course, branch, fees=0):
+    def __init__(self, student_id, name, year, course, branch, phone, email, fees=0):
         self.student_id = student_id
         self.name = name
         self.year = year
         self.course = course
         self.fees = fees
         self.branch = branch
+        self.phone = phone
+        self.email = email
 
     def display_profile(self):
-        print(f"ID: {self.student_id}, Name: {self.name}, Year: {self.year}, Course: {self.course}, Branch: {self.branch}")
+        print(f"ID: {self.student_id}, Name: {self.name}, Year: {self.year}, Course: {self.course}, Branch: {self.branch}, Phone: {self.phone}, Email: {self.email}")
 
 class Faculty:
-    def __init__(self, faculty_id, name, department):
+    def __init__(self, faculty_id, name, department, phone, email):
         self.faculty_id = faculty_id
         self.name = name
         self.department = department
+        self.phone = phone
+        self.email = email
 
     def display_profile(self):
-        print(f"ID: {self.faculty_id}, Name: {self.name}, Department: {self.department}")
+        print(f"ID: {self.faculty_id}, Name: {self.name}, Department: {self.department}, Phone: {self.phone}, Email: {self.email}")
 
 class Club(CollegeEntity):
     CLUB_CATEGORIES = {
@@ -129,6 +133,75 @@ class Club(CollegeEntity):
                 print(f" - {student.name} (ID: {student.student_id}, Dept: {student.branch})")
             else:
                 print(f" - [Invalid member data for ID: {member}]")
+
+# Society class inserted here
+class Society(CollegeEntity):
+    SOCIETY_CATEGORIES = {
+        "Departmental": ["SAE", "IEEE"],
+        "Non-Departmental": ["DSW", "E-Cell", "Training and Placement Cell"]
+    }
+
+    def __init__(self, name, head, coordinator=None):
+        super().__init__(name)
+        self.name = name
+        self._head = head
+        self._coordinator = coordinator
+        self.members = []
+        self.volunteers = []
+        self.category = self._get_category(name)
+
+    def _get_category(self, name):
+        for category, names in self.SOCIETY_CATEGORIES.items():
+            if name in names:
+                return category
+        return "Uncategorized"
+
+    # head
+    @property
+    def head(self):
+        return self._head
+
+    @head.setter
+    def head(self, new_head):
+        self._head = new_head
+        print(f"Society head updated to: {new_head}")
+
+    # coordinator
+    @property
+    def coordinator(self):
+        return self._coordinator
+
+    @coordinator.setter
+    def coordinator(self, new_coordinator):
+        self._coordinator = new_coordinator
+        print(f"Coordinator updated to: {new_coordinator}")
+
+    # Members and Volunteers
+    def add_member(self, name, student_id, department):
+        self.members.append({"name": name, "id": student_id, "department": department})
+        print(f"{name} added to society {self.name}")
+
+    def remove_member(self, student_id):
+        self.members = [m for m in self.members if m["id"] != student_id]
+        print(f"Member with ID {student_id} removed from {self.name}")
+
+    def add_volunteer(self, name, student_id, department):
+        self.volunteers.append({"name": name, "id": student_id, "department": department})
+        print(f"Volunteer {name} from {department} added to {self.name}")
+
+    # Society Info View
+    def show_society_info(self):
+        print(f"\nSociety: {self.name} ({self.category})")
+        print(f"Head: {self._head}")
+        if self._coordinator:
+            print(f"Coordinator: {self._coordinator}")
+        print(f"Members ({len(self.members)}):")
+        for m in self.members:
+            print(f"  - {m['name']} (ID: {m['id']}, Dept: {m['department']})")
+        if self.volunteers:
+            print(f"Volunteers ({len(self.volunteers)}):")
+            for v in self.volunteers:
+                print(f"  - {v['name']} (ID: {v['id']}, Dept: {v['department']})")
 
 class Department(CollegeEntity):
     def __init__(self,id, name, courses, std, std_db, faculty, faculty_db):
@@ -431,9 +504,9 @@ if __name__ == "__main__":
     CollegeEntity.get_college_info()
 
     # 2. Creating Students
-    s1 = Student("S101", "Amit Sharma", 2, "B.Tech", "Computer Science")
-    s2 = Student("S102", "Riya Verma", 3, "B.Tech", "Electronics")
-    s3 = Student("S103", "Manish Kumar", 1, "B.Tech", "Mechanical")
+    s1 = Student("S101", "Amit Sharma", 2, "B.Tech", "Computer Science", "9000000001", "amit@college.edu")
+    s2 = Student("S102", "Riya Verma", 3, "B.Tech", "Electronics", "9000000002", "riya@college.edu")
+    s3 = Student("S103", "Manish Kumar", 1, "B.Tech", "Mechanical", "9000000003", "manish@college.edu")
 
     # 3. Adding Students to Database
     student_db[s1.student_id] = s1
@@ -446,8 +519,8 @@ if __name__ == "__main__":
     s3.display_profile()
 
     # 5. Creating Faculty
-    f1 = Faculty("F201", "Dr. Anil Singh", "Computer Science")
-    f2 = Faculty("F202", "Prof. Neha Agarwal", "Electronics")
+    f1 = Faculty("F201", "Dr. Anil Singh", "Computer Science", "8000000001", "anil@college.edu")
+    f2 = Faculty("F202", "Prof. Neha Agarwal", "Electronics", "8000000002", "neha@college.edu")
 
     # 6. Adding Faculty to Database
     faculty_db[f1.faculty_id] = f1
@@ -469,6 +542,12 @@ if __name__ == "__main__":
     dance_club.remove_member("S102")
     dance_club.change_secretary(s3)
     dance_club.display_club_info()
+
+    # 9a. Creating and Managing Society
+    society = Society("SAE", "Dr. Rakesh Kumar", "Prof. Neha Agarwal")
+    society.add_member("Amit Sharma", "S101", "Computer Science")
+    society.add_volunteer("Riya Verma", "S102", "Electronics")
+    society.show_society_info()
 
     # 10. Hostel Management
     rooms = {
