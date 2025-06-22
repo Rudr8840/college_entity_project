@@ -1,5 +1,5 @@
 ---
-### College Management System
+# College Management System
 
 This Python project provides a foundational **College Management System**, simulating various interconnected entities within a higher education institution. It's designed to illustrate object-oriented programming concepts and demonstrate how different components of a college interact.
 
